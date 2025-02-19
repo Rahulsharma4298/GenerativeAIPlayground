@@ -4,7 +4,7 @@ from typing import TypedDict, Annotated, List
 from langchain_community.document_loaders import WikipediaLoader
 from langchain_core.language_models import BaseChatModel
 from langgraph.graph import START, END, StateGraph
-from langchain_community.tools import TavilySearchResults
+from langchain_community.tools import TavilySearchResults, YouTubeSearchTool
 
 
 class ResearchAssistant:
@@ -29,7 +29,8 @@ class ResearchAssistant:
         )
         results = tavily_search_tool.run(state['topic'])
         print(results)
-        return {"context": [results]}
+        return {"context": results}
+
 
     @staticmethod
     def search_wikipedia(state: State):
@@ -39,14 +40,24 @@ class ResearchAssistant:
                            "source": document.metadata['source']} for document in documents]
         return {"context": formatted_data}
 
+    @staticmethod
+    def search_youtube(state: State):
+        yt_search_tool = YouTubeSearchTool()
+        results = yt_search_tool.run(state['topic'], num_results=1, verbose=True)
+        print(results)
+        return {"context": [results]}
+
     def research_assistant(self, state: State):
         prompt = ("You are an expert research analyst."
                   "Based on given context, generate a good detailed report"
                   "which includes detailed points about each point."
                   "Format the output as Markdown."
                   "Always includes sources section at last."
+                  "Also render a youtube video available in context."
                   "<context>{context}</context>")
         response = self.model.invoke(prompt.format(context=state['context']))
+        print("="*10)
+        print(state['context'])
         return {"report": response}
 
 
@@ -54,11 +65,14 @@ class ResearchAssistant:
         builder = StateGraph(ResearchAssistant.State)
         builder.add_node("search_tavily", ResearchAssistant.search_tavily)
         builder.add_node("search_wikipedia", ResearchAssistant.search_wikipedia)
+        builder.add_node("search_youtube", ResearchAssistant.search_youtube)
         builder.add_node(ResearchAssistant.ROOT_NODE, self.research_assistant)
         builder.add_edge(START, "search_tavily")
         builder.add_edge(START, "search_wikipedia")
+        builder.add_edge(START, "search_youtube")
         builder.add_edge("search_tavily", ResearchAssistant.ROOT_NODE)
         builder.add_edge("search_wikipedia", ResearchAssistant.ROOT_NODE)
+        builder.add_edge("search_youtube", ResearchAssistant.ROOT_NODE)
         builder.add_edge(ResearchAssistant.ROOT_NODE, END)
         graph = builder.compile()
         return graph

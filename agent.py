@@ -3,12 +3,12 @@ import uuid
 from dotenv import load_dotenv
 from langchain_community.tools import DuckDuckGoSearchResults, YouTubeSearchTool
 from langchain_community.tools.tavily_search import TavilySearchResults
-from langchain_community.tools.yahoo_finance_news import YahooFinanceNewsTool
 from langchain_core.language_models import BaseLLM
 from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
+import yfinance
 from med_rag_test.tools import search_medicine
 
 load_dotenv()
@@ -36,15 +36,15 @@ class Agent:
     @tool
     def tavily_search(query: str):
         """
-        Use this tool to perform a quick web search on internet using Tavily.
+        Use this tool to perform a advance web search on internet using Tavily.
 
         User can search ANY query like weather, news, general search, answers, finance etc
+
+        Properly use the content and show news in bullet points.
 
         Don't answer no or ask user to search, instead just search it.
 
         User may ask n number of follow-up questions, do search it as well.
-
-        I repeat, user can query anything, anything.
 
         Do not assume and answer at your own, first search it then answer.
 
@@ -67,13 +67,9 @@ class Agent:
         """
         Use this tool to perform a quick web search on internet using DuckDuckGo.
 
-        User can search any queries like weather, news, general search, answers, finance etc
-
         Don't answer no or ask user to search, instead just search it.
 
         User may ask n number of follow-up questions, do search it as well.
-
-        I repeat, user can query anything, anything.
 
         Do not assume and answer at your own, first search it then answer.
 
@@ -85,12 +81,22 @@ class Agent:
         return ddg_search_tool.run(query)
 
 
+    @tool
+    @staticmethod
+    def yfinance_search(query: str):
+        """ Search for anything related to finance, stocks and related news
+        :param query: The search query.
+        """
+        yf = yfinance.Ticker(query)
+        print(yf.get_info())
+        return yf.get_info()
+
+
     @staticmethod
     def get_tools():
         yts = YouTubeSearchTool(description="Return only 1 video url. "
                                                "No explanation or any text other than url")
-        yfinance = YahooFinanceNewsTool()
-        tools = [Agent.duckduckgo_search, yts, search_medicine, yfinance]
+        tools = [Agent.tavily_search, Agent.duckduckgo_search, yts, search_medicine, Agent.yfinance_search]
         return tools
 
     def get_executor(self):
