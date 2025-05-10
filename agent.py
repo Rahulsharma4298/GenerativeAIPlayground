@@ -28,7 +28,7 @@ class Agent:
                                                   checkpointer=self.memory,
                                                   debug=True,
                                                   messages_modifier='Do not use tool when user makes general conversations.'
-                                                                    'Format the response in Markdown.'
+                                                                    'Format the response in Markdown points.'
                                                                     'if the response has image, always render it as Markdown.'
                                                                     'If the response has youtube video url, return only its url without any text.')
 
