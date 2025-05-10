@@ -1,3 +1,6 @@
+import base64
+from tempfile import NamedTemporaryFile
+
 import streamlit as st
 from chat_factory import chat
 from rag import RAG
@@ -20,10 +23,15 @@ def render_menu():
                 with st.spinner('Embedding ..'):
                     st.session_state.retriever = RAG.embed_docs(file.getvalue())
                     st.session_state.file_hash = file_hash
+    image_file = st.file_uploader("Upload image", type=('jpg', 'png', 'jpeg'))
+    encoded_image = None
     if user_input := st.chat_input():
+        if image_file:
+            st.image(image_file)
+            encoded_image = base64.b64encode(image_file.read()).decode()
         st.chat_message('user').write(user_input)
         with st.spinner(':brain: Processing ..'):
-            resp = chat(user_input, model=selected_model, type=type_, temperature=temperature, retriever=st.session_state.retriever)
+            resp = chat(user_input, model=selected_model, type=type_, temperature=temperature, retriever=st.session_state.retriever, encoded_image=encoded_image)
             if type_ == 'agent' and resp.startswith('https://www.youtube.com'):
                 st.chat_message('assistant').video(resp)
             else:
@@ -50,7 +58,7 @@ with st.sidebar:
     st.header("⚙️ Settings", divider='green')
 
     st.subheader("🤖 Choose AI Model")
-    model_options = ["gemini-1.5-flash", "gemini-2.0-flash-exp", "llama3-70b-8192", "llama-3.1-8b-instant",
+    model_options = ["gemini-1.5-flash", "gemini-2.0-flash", "llama3-70b-8192", "llama-3.1-8b-instant",
                      "llama-3.3-70b-versatile", "deepseek-r1-distill-llama-70b",
                      "gemma2-9b-it", "gpt-4o-mini", "gpt-3.5-turbo"]
     selected_model = st.selectbox("Model:", model_options)
