@@ -27,7 +27,7 @@ def chat(query, model='gemini', type='chat', **kwargs):
         return resp.content
     elif type == 'chat':
         from chatbot import chat
-        return chat(query, model)
+        return chat(query, model, kwargs.get('encoded_image'))
     elif type == 'rag':
         from rag import RAG
         rag = RAG(model, retriever)

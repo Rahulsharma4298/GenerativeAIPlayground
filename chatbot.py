@@ -35,6 +35,9 @@ def get_session_history(session_id: str) -> BaseChatMessageHistory:
 
 config = {"configurable": {"session_id": "abc2"}}
 
-def chat(query, model):
-    return get_chain(model).stream({"messages": [HumanMessage(query)]},
+def chat(query, model, encoded_image=None):
+    return get_chain(model).stream({"messages": [HumanMessage(content=[
+        {"type": "text", "text": query},
+        {"type": "image_url", "image_url": f"data:image/png;base64,{encoded_image}"},
+    ])]},
                                              config=config)
