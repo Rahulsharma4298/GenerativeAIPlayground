@@ -31,7 +31,12 @@ def render_menu():
             encoded_image = base64.b64encode(image_file.read()).decode()
         st.chat_message('user').write(user_input)
         with st.spinner(':brain: Processing ..'):
-            resp = chat(user_input, model=selected_model, type=type_, temperature=temperature, retriever=st.session_state.retriever, encoded_image=encoded_image)
+            resp = chat(user_input,
+                        model=selected_model,
+                        type=type_,
+                        temperature=temperature,
+                        retriever=st.session_state.retriever,
+                        encoded_image=encoded_image)
             if type_ == 'agent' and resp.startswith('https://www.youtube.com'):
                 st.chat_message('assistant').video(resp)
             else:
@@ -58,8 +63,11 @@ with st.sidebar:
     st.header("⚙️ Settings", divider='green')
 
     st.subheader("🤖 Choose AI Model")
-    model_options = ["gemini-1.5-flash", "gemini-2.0-flash", "llama3-70b-8192", "llama-3.1-8b-instant",
-                     "llama-3.3-70b-versatile", "deepseek-r1-distill-llama-70b",
+    model_options = ["gemini-2.5-flash", "gemini-2.5-pro",
+                     "meta-llama/llama-4-maverick-17b-128e-instruct",
+                     "llama-3.3-70b-versatile", "llama3-70b-8192"
+                     "llama-3.1-8b-instant",
+                     "deepseek-r1-distill-llama-70b",
                      "gemma2-9b-it", "gpt-4o-mini", "gpt-3.5-turbo"]
     selected_model = st.selectbox("Model:", model_options)
     st.session_state.selected_model = selected_model

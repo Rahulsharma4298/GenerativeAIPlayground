@@ -13,8 +13,9 @@ def get_model(name: str, **kwargs) -> BaseLLM:
     elif 'gpt' in name:
         return ChatOpenAI(model_name=name)
     else:
+        kwargs.pop('encoded_image')
         return ChatGroq(model=name,
-                 max_retries=2,
+                        max_retries=2,
                         **kwargs)
 
 
