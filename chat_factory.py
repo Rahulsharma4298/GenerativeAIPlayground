@@ -43,13 +43,13 @@ def chat(query, model='gemini', type='chat', **kwargs):
         from research_assistant import ResearchAssistant
         rag = ResearchAssistant(model)
         return rag.chat(query)
-    elif type == 'mcp_agent':
-        from mcp_agent_v2 import MyMCPAgent
-        agent = MyMCPAgent(model)
-        # from mcp_agent import MCPAgent
-        # agent = MCPAgent(model)
-        # return agent.chat(query)
-        return agent.chat(query)
+    # elif type == 'mcp_agent':
+    #     from mcp_agent_v2 import MyMCPAgent
+    #     agent = MyMCPAgent(model)
+    #     # from mcp_agent import MCPAgent
+    #     # agent = MCPAgent(model)
+    #     # return agent.chat(query)
+    #     return agent.chat(query)
 
 
 
