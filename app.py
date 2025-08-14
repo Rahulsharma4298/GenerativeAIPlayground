@@ -1,10 +1,9 @@
 import base64
-from tempfile import NamedTemporaryFile
 
 import streamlit as st
+
 from chat_factory import chat
 from rag import RAG
-
 
 if 'retriever' not in st.session_state:
     st.session_state.retriever = None
@@ -31,6 +30,12 @@ def render_menu():
             encoded_image = base64.b64encode(image_file.read()).decode()
         st.chat_message('user').write(user_input)
         with st.spinner(':brain: Processing ..'):
+            # resp = asyncio.run(chat(user_input,
+            #             model=selected_model,
+            #             type=type_,
+            #             temperature=temperature,
+            #             retriever=st.session_state.retriever,
+            #             encoded_image=encoded_image))
             resp = chat(user_input,
                         model=selected_model,
                         type=type_,
@@ -51,6 +56,7 @@ with st.sidebar:
         "Chat": "chat",
         "RAG": "rag",
         "Agent": "agent",
+        "MCP-Agent": "mcp_agent",
         "ResearchAssistant": "research_assistant"
     }
 
@@ -63,12 +69,13 @@ with st.sidebar:
     st.header("⚙️ Settings", divider='green')
 
     st.subheader("🤖 Choose AI Model")
-    model_options = ["gemini-2.5-flash", "gemini-2.5-pro",
+    model_options = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-1.5-flash",
                      "meta-llama/llama-4-maverick-17b-128e-instruct",
                      "llama-3.3-70b-versatile", "llama3-70b-8192"
                      "llama-3.1-8b-instant",
                      "deepseek-r1-distill-llama-70b",
-                     "gemma2-9b-it", "gpt-4o-mini", "gpt-3.5-turbo"]
+                     "gemma2-9b-it", "gpt-4o-mini", "gpt-3.5-turbo",
+                     "openai/gpt-oss-20b"]
     selected_model = st.selectbox("Model:", model_options)
     st.session_state.selected_model = selected_model
 
